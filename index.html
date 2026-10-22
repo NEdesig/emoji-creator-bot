@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Emoji Creator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090b10;color:#f5f6fa;font-family:-apple-system,BlinkMacSystemFont,"Arial",sans-serif;padding:20px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;margin:8px 0 24px}
+h1{font-size:23px;margin:0}header p{color:#858b99;margin:6px 0;font-size:13px}
+.balance{border:1px solid #292e38;padding:10px 14px;border-radius:14px;color:#55c3ff}
+.panel{background:#11141c;border:1px solid #292e38;border-radius:22px;padding:16px;margin:14px 0}
+input,button,select{font:inherit}
+input[type=text]{width:100%;background:#0c0f15;color:white;border:1px solid #292e38;border-radius:14px;padding:15px;outline:none}
+h2{font-size:12px;letter-spacing:2px;color:#a0a7b5;margin:0 0 14px}
+.preview{height:185px;border-radius:18px;background:#0b0e14;display:grid;place-items:center;margin:14px 0}
+.emoji{width:110px;height:110px;border-radius:30px;background:#55c3ff;display:grid;place-items:center;color:#080a0e;font-size:37px;font-weight:900;transition:.2s}
+label{font-size:12px;color:#a0a7b5;display:block;margin:15px 0 8px}
+input[type=color]{width:45px;height:40px;border:0;background:none}
+input[type=range]{width:100%;accent-color:#55c3ff}
+button{background:#171c26;border:1px solid #303744;color:white;border-radius:13px;padding:12px;cursor:pointer}
+button.active,.primary{background:#19303e;border-color:#55c3ff;color:#55c3ff}
+.colors{display:flex;gap:10px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.template{min-width:0;aspect-ratio:1/1;background:#11141c;border:1px solid #292e38;border-radius:17px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px}
+.art{font-size:43px;line-height:1.1}
+.template small{color:#9299a8;font-size:11px}
+.wide{width:100%;margin-top:12px}
+.note{font-size:12px;color:#8991a0;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+<div><h1>Emoji Creator</h1><p>PREMIUM EMOJI STUDIO</p></div>
+<div class="balance">✦ <span id="count">0</span></div>
+</header>
+
+<div class="panel">
+<h2>ПРЕДПРОСМОТР</h2>
+<div class="preview"><div class="emoji" id="preview">EC</div></div>
+<label>ТЕКСТ / ИНИЦИАЛЫ</label>
+<input id="caption" type="text" maxlength="5" placeholder="Например, EC" value="EC">
+<label>ПЕРВЫЙ ЦВЕТ</label>
+<div class="colors"><input type="color" id="c1" value="#55c3ff"><span id="hex1">#55C3FF</span></div>
+<label>ВТОРОЙ ЦВЕТ</label>
+<div class="colors"><input type="color" id="c2" value="#ff9c42"><span id="hex2">#FF9C42</span></div>
+<label>ЗАЛИВКА</label>
+<div class="colors">
+<button class="active" id="solid">Обычная</button>
+<button id="gradient">Градиент</button>
+</div>
+<label>РАЗМЕР</label>
+<input id="size" type="range" min="60" max="145" value="110">
+<label>ФОРМА</label>
+<div class="colors">
+<button class="shape active" data-shape="30px">Скруглённая</button>
+<button class="shape" data-shape="50%">Круг</button>
+<button class="shape" data-shape="8px">Квадрат</button>
+</div>
+<button class="wide primary" id="save">Сохранить дизайн</button>
+<p class="note">Пока это визуальный прототип. Сохранение запоминает настройки в текущем браузере. Создание настоящих Telegram-эмодзи подключим отдельно.</p>
+</div>
+
+<div class="panel">
+<h2>КАТАЛОГ ШАБЛОНОВ</h2>
+<input id="search" type="text" placeholder="Поиск шаблонов...">
+<div style="height:14px"></div>
+<div class="grid" id="grid"></div>
+</div>
+<script>
+const templates=[
+["Щит","⬟"],["Медаль","🏅"],["Улыбка","☻"],
+["Сердце","♥"],["Молния","ϟ"],["Корона","♛"],
+["Звезда","★"],["Огонь","♨"],["Кубок","🏆"],
+["Шайба","●"],["Стрела","➤"],["Буква","EC"],
+["Кольцо","◎"],["Алмаз","◆"],["Трофей","♜"],
+["Мяч","◉"],["Крылья","♧"],["Знак","✦"]
+];
+const $=id=>document.getElementById(id);
+let isGradient=false;
+function update(){
+const p=$("preview"),a=$("c1").value,b=$("c2").value;
+p.textContent=$("caption").value||"EC";
+p.style.width=$("size").value+"px";
+p.style.height=$("size").value+"px";
+p.style.background=isGradient?`linear-gradient(135deg,${a},${b})`:a;
+$("hex1").textContent=a.toUpperCase();
+$("hex2").textContent=b.toUpperCase();
+}
+["caption","c1","c2","size"].forEach(id=>$(id).addEventListener("input",update));
+$("solid").onclick=()=>{isGradient=false;$("solid").classList.add("active");$("gradient").classList.remove("active");update()};
+$("gradient").onclick=()=>{isGradient=true;$("gradient").classList.add("active");$("solid").classList.remove("active");update()};
+document.querySelectorAll(".shape").forEach(btn=>btn.onclick=()=>{
+document.querySelectorAll(".shape").forEach(x=>x.classList.remove("active"));
+btn.classList.add("active");$("preview").style.borderRadius=btn.dataset.shape;
+});
+function render(){
+const q=$("search").value.toLowerCase();
+$("grid").innerHTML="";
+templates.filter(t=>t[0].toLowerCase().includes(q)).forEach((t,i)=>{
+const el=document.createElement("button");
+el.className="template";
+const art=document.createElement("span");art.className="art";art.textContent=t[1];
+const label=document.createElement("small");label.textContent=(i+1)+". "+t[0];
+el.append(art,label);
+el.onclick=()=>{$("caption").value=t[1];update();window.scrollTo({top:0,behavior:"smooth"})};
+$("grid").append(el);
+});
+}
+$("search").addEventListener("input",render);
+$("save").onclick=()=>{
+try{localStorage.setItem("emojiCreatorDesign",JSON.stringify({
+caption:$("caption").value,c1:$("c1").value,c2:$("c2").value,
+size:$("size").value,gradient:isGradient,
+shape:$("preview").style.borderRadius
+}));$("count").textContent="✓";alert("Дизайн сохранён в этом браузере!")}
+catch(e){alert("Не удалось сохранить дизайн")}
+};
+try{
+const d=JSON.parse(localStorage.getItem("emojiCreatorDesign"));
+if(d){$("caption").value=d.caption;$("c1").value=d.c1;$("c2").value=d.c2;$("size").value=d.size;isGradient=d.gradient;$("preview").style.borderRadius=d.shape;$("solid").classList.toggle("active",!isGradient);$("gradient").classList.toggle("active",isGradient)}
+}catch(e){}
+update();render();
+</script>
+</body>
+</html>
